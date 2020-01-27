@@ -2,6 +2,7 @@ package com.example.devicemanagement.devicemanagement.Dao;
 
 import com.example.devicemanagement.devicemanagement.Model.Device;
 import com.example.devicemanagement.devicemanagement.Model.ResponseModel;
+import com.example.devicemanagement.devicemanagement.Model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 
@@ -18,8 +19,8 @@ public interface DeviceRepository {
     ResponseEntity assign(String username, Device device);
     List<Map<String, Object>> unAssign(String username, Device device);
     List<Device> devicesPerUser(String username);
-    List<Map<String, Object>> getDeviceHistory(int device_id);
-    List<Map<String, Object>> devicesPerDept(int dept_id);
+    List<User> getDeviceHistory(int device_id);
+    List<Device> devicesPerDept(int dept_id);
 
 
 

@@ -2,6 +2,7 @@ package com.example.devicemanagement.devicemanagement.Controller;
 
 import com.example.devicemanagement.devicemanagement.Model.ResponseModel;
 import com.example.devicemanagement.devicemanagement.Model.User;
+import com.example.devicemanagement.devicemanagement.Model.UserDeviceCount;
 import com.example.devicemanagement.devicemanagement.Service.UserService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,15 @@ public class UserController {
 
     }
 
-    @GetMapping("/usersPerDept/{dept_id}")
+    @GetMapping("/usersPerDept/{deptid}")
     @ApiOperation(value = "List of all Users per Department",responseContainer = "List",response = User.class)
-    public List<User> usersPerDept(@ApiParam("Department id to get all Users for that Department") @PathVariable int dept_id){
-       return userService.usersPerDept(dept_id);
+    public List<User> usersPerDept(@ApiParam("Department id to get all Users for that Department") @PathVariable int deptid){
+       return userService.usersPerDept(deptid);
+    }
+
+    @GetMapping("/maxDeviceUsers/{deptid}")
+    public List<UserDeviceCount> maxDeviceUsersPerDept(@PathVariable int deptid){
+       return userService.maxDeviceUsersPerDept(deptid);
     }
 
 

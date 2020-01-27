@@ -1,8 +1,10 @@
 package com.example.devicemanagement.devicemanagement.Service;
 
 import com.example.devicemanagement.devicemanagement.Dao.DeviceRepository;
+import com.example.devicemanagement.devicemanagement.Model.Department;
 import com.example.devicemanagement.devicemanagement.Model.Device;
 import com.example.devicemanagement.devicemanagement.Model.ResponseModel;
+import com.example.devicemanagement.devicemanagement.Model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +16,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class DeviceService implements DeviceRepository {
     @Autowired
     public JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private UserService userService;
 
 
     @Override
@@ -81,10 +85,6 @@ public class DeviceService implements DeviceRepository {
         }else{
             return new ResponseEntity<>("Device does not exist",HttpStatus.NOT_FOUND);
         }
-
-
-
-
     }
 
     @Override
@@ -101,8 +101,8 @@ public class DeviceService implements DeviceRepository {
         String query="SELECT device_id FROM USERS_DEVICES WHERE username=? AND assigned=?";
 
         String query2="SELECT * FROM DEVICE WHERE id=?";
-
-      List<Device> device1=  jdbcTemplate.query(query,new Object[]{username,true} ,(ResultSet rs,int row)->{
+        List<Device> device1=new ArrayList<>();
+      jdbcTemplate.query(query,new Object[]{username,true} ,(ResultSet rs,int row)->{
 
          return  (jdbcTemplate.query(query2,new Object[]{rs.getInt("device_id")}, (ResultSet rs1, int num)->{
               Device device=new Device();
@@ -110,8 +110,9 @@ public class DeviceService implements DeviceRepository {
               device.setPlatform(rs1.getString("platform"));
               device.setType(rs1.getString("type"));
               device.setListed_on(rs1.getTimestamp("listed_on"));
+              device1.add(device);
               return device;
-          })).get(0);
+          }));
         });
         return device1;
 
@@ -131,48 +132,80 @@ public class DeviceService implements DeviceRepository {
     }
 
     @Override
-    public List<Map<String, Object>> getDeviceHistory(int device_id) {
+    public List<User> getDeviceHistory(int device_id) {
 
-        String query="SELECT username FROM USERS_DEVICES WHERE device_id=?";
-        List<Map<String, Object>> list= jdbcTemplate.queryForList(query,device_id);
-       // System.out.println(list.get(0).keySet());
+        String query1="SELECT username FROM USERS_DEVICES WHERE device_id=?";
+        //List<Map<String, Object>> list= jdbcTemplate.queryForList(query1,device_id);
+
+        List<User> users=jdbcTemplate.query(query1,new Object[]{device_id},(ResultSet rs,int num)->{
+            User user=new User();
+            user.setUsername(rs.getString("username"));
+            return user;
+        });
 
         String query2="SELECT * FROM USERS WHERE username=?";
-        List<Map<String, Object>> list3=new ArrayList<>();
-        for (Map<String, Object> row :list) {
+        List<User> userList=new ArrayList<>();
+        for(User user:users){
+            jdbcTemplate.query(query2,new Object[]{user.getUsername()},(ResultSet rs, int num)->{
+                User user1=new User();
+                user1.setUsername(rs.getString("username"));
+                user1.setName(rs.getString("name"));
+                user1.setPassword(rs.getString("password"));
+                user1.setDepartment(new Department(rs.getInt("deptid")));
+                user1.setTimestamp(rs.getTimestamp("createdon"));
+                userList.add(user1);
+                return user1;
+            });
 
-            list3.add((jdbcTemplate.queryForList(query2,row.get("username"))).get(0));
         }
-        return list3;
+        return userList;
     }
 
     @Override
-    public List<Map<String, Object>> devicesPerDept(int dept_id) {
+    public List<Device> devicesPerDept(int deptid) {
+
         String query1="SELECT username from USERS where deptid=?";
-        List<Map<String, Object>> list= jdbcTemplate.queryForList(query1,dept_id);
-        List<Map<String, Object>> list2=new ArrayList<>();
 
-        String query2="SELECT device_id FROM USERS_DEVICES WHERE username=?";
-        for(Map<String,Object> row:list){
-            list2.add(jdbcTemplate.queryForList(query2,row.get("username")).get(0));
+        //
+            List<User> users=jdbcTemplate.query(query1,new Object[]{deptid},(ResultSet rs,int num)->{
+            User user=new User();
+            user.setUsername(rs.getString("username"));
+            return user;
+        });
+
+        String query2="SELECT device_id FROM USERS_DEVICES WHERE username=? AND assigned=?";
+
+      List<Device> devices=new ArrayList<>();
+        for(User user:users){
+           jdbcTemplate.query(query2,new Object[]{user.getUsername(),true},(ResultSet rs, int num)->{
+             Device device=new Device();
+             device.setId(rs.getInt("device_id"));
+             devices.add(device);
+             return device;
+            });
         }
 
-        List<Map<String,Object>> list4=new ArrayList<>();
 
-        List<Map<String, Object>> list3=jdbcTemplate.queryForList("SELECT * FROM DEVICE");
-        for(Map<String,Object> row:list2){
-
-             list4.add(list3.stream().filter(stringObjectMap -> stringObjectMap.containsValue(
-
-//                list2.stream().filter((Map<String,Object> m)-> {return m.get("device_id");}))
-//                    list2.stream().map((Map<String,Object> m)-> m.get("device_id")
-//                    ).collect(Collectors.toList())
-
-                     row.get("device_id")
-            )).collect(Collectors.toList()).get(0));
+        List<Device> list=new ArrayList<>();
+        String query3="SELECT * FROM DEVICE WHERE id=?";
+        for(Device device:devices){
+            jdbcTemplate.query(query3,new Object[]{device.getId()},(ResultSet rs, int num)->{
+                Device device1=new Device();
+                device1.setId(rs.getInt("id"));
+                device1.setType(rs.getString("type"));
+                device1.setListed_on(rs.getTimestamp("listed_on"));
+                device1.setPlatform(rs.getString("platform"));
+                list.add(device1);
+                return device1;
+            });
         }
-        return list4;
+
+        return  list;
     }
+
+
+
+
 
 
     private boolean isDeviceExist(int device_id){

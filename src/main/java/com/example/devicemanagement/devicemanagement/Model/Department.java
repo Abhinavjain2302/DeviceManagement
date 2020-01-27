@@ -14,4 +14,8 @@ public class Department {
 
     public Department(){}
 
+    public  Department(int id){
+        this.id=id;
+    }
+
 }

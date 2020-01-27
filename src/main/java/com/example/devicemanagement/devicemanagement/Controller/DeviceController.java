@@ -2,6 +2,7 @@ package com.example.devicemanagement.devicemanagement.Controller;
 
 import com.example.devicemanagement.devicemanagement.Model.Device;
 import com.example.devicemanagement.devicemanagement.Model.ResponseModel;
+import com.example.devicemanagement.devicemanagement.Model.User;
 import com.example.devicemanagement.devicemanagement.Service.DeviceService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,16 +57,14 @@ public class DeviceController {
     }
 
     @GetMapping("/deviceHistory/{device_id}")
-    public List<Map<String, Object>> getDeviceHistory(@PathVariable int device_id){
+    public List<User> getDeviceHistory(@PathVariable int device_id){
        return deviceService.getDeviceHistory(device_id);
     }
 
-    @GetMapping("/devicesPerDept/{dept_id}")
-    public List<Map<String, Object>> devicesPerDept(@PathVariable int dept_id){
-       return deviceService.devicesPerDept(dept_id);
+    @GetMapping("/devicesPerDept/{deptid}")
+    public List<Device> devicesPerDept(@PathVariable int deptid){
+       return deviceService.devicesPerDept(deptid);
     }
-
-
 
 
 }

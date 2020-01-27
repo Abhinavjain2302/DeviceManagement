@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 
 
@@ -21,4 +22,12 @@ public class User {
 
     }
 
+
+//    public User(String username, String password, String name, Timestamp timestamp,Department department){
+//        this.username=username;
+//        this.password=password;
+//        this.name=name;
+//        this.timestamp=timestamp;
+//        this.department=department;
+//    }
 }

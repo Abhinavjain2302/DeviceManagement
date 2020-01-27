@@ -2,6 +2,7 @@ package com.example.devicemanagement.devicemanagement.Dao;
 
 import com.example.devicemanagement.devicemanagement.Model.ResponseModel;
 import com.example.devicemanagement.devicemanagement.Model.User;
+import com.example.devicemanagement.devicemanagement.Model.UserDeviceCount;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +15,6 @@ public interface UserRepository {
     List<User> getUsers();
     Object updateUser(String username, User user);
     List<User> usersPerDept(int dept_id);
+    List<UserDeviceCount> maxDeviceUsersPerDept(int deptid);
 
 }
